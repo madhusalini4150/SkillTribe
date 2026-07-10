@@ -135,5 +135,5 @@ locally it falls back to **SQLite** automatically — no code changes needed.
 - [ ] Admin panel (Flask-Admin)
 
 ---
-
+Small documentation improvement by Sridiyva
 Built with Flask, SQLAlchemy, Flask-Login, Flask-Bcrypt, WTForms, Gunicorn.
