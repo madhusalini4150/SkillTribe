@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Payment Successful{% endblock %}
+
+{% block content %}
+
+<div style="max-width:700px;margin:60px auto;" class="glass">
+
+    <div style="padding:40px;text-align:center;">
+
+        <h1 style="color:#2FE3B4;">
+            ✅ Payment Successful
+        </h1>
+
+        <br>
+
+        <h3>
+            Booking Confirmed
+        </h3>
+
+        <br>
+
+        <p>
+            Teacher:
+            <strong>{{ booking.teacher.username }}</strong>
+        </p>
+
+        <br>
+
+        <p>
+            Amount Paid:
+            <strong>
+                {{ booking.currency }}
+                {{ booking.amount|int }}
+            </strong>
+        </p>
+
+        <br><br>
+
+        <a href="{{ url_for('conversation', user_id=booking.teacher.id) }}"
+           class="btn btn-grad btn-full"
+           style="margin-bottom:10px;">
+            💬 Chat with Teacher
+        </a>
+
+        <a href="{{ url_for('call', user_id=booking.teacher.id) }}"
+           class="btn btn-full"
+           style="background:#2FE3B4;color:black;font-weight:700;">
+            📹 Start Video Call
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

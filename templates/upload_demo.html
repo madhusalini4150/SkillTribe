@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Upload Demo Video{% endblock %}
+
+{% block content %}
+
+<div style="max-width:650px;margin:50px auto;" class="glass">
+
+    <div style="padding:35px;">
+
+        <h2 style="margin-bottom:25px;">
+            📹 Upload Demo Video
+        </h2>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            <label>Video Title</label>
+
+            <input
+                type="text"
+                name="title"
+                class="form-control"
+                placeholder="Example: Python Basics Demo"
+                required>
+
+            <br>
+
+            <label>Select Video</label>
+
+            <input
+                type="file"
+                name="video"
+                class="form-control"
+                accept="video/*"
+                required>
+
+            <br>
+
+            <button class="btn btn-grad btn-full">
+                Upload Demo Video
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

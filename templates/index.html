@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<style>
+.hero-wrap{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+            text-align:center;padding:60px 24px 80px;position:relative;}
+.hero-h1{font-family:var(--font-display);font-weight:400;
+  font-size:clamp(40px,9vw,92px);line-height:0.95;letter-spacing:-2px;
+  max-width:1000px;color:var(--fg);margin:0;text-shadow:0 4px 24px rgba(0,0,0,0.35);}
+.hero-h1 em{font-style:normal;color:var(--muted);}
+.hero-sub{font-family:var(--font-body);font-weight:400;color:var(--muted);
+  font-size:17px;max-width:640px;margin-top:32px;line-height:1.7;text-shadow:0 2px 12px rgba(0,0,0,0.3);}
+.hero-cta-row{display:flex;gap:14px;margin-top:44px;flex-wrap:wrap;justify-content:center;}
+.hero-cta-glass{padding:18px 44px;border-radius:100px;font-family:var(--font-body);
+  font-size:16px;font-weight:600;color:#fff;text-decoration:none;display:inline-block;
+  transition:transform 0.2s;cursor:pointer;}
+.hero-cta-glass:hover{transform:scale(1.03);}
+.hero-stats{display:flex;gap:36px;margin-top:56px;flex-wrap:wrap;justify-content:center;}
+.stat-n{font-family:var(--font-display);font-size:30px;color:var(--fg);}
+.stat-l{font-size:12px;color:var(--muted);margin-top:3px;font-weight:500;}
+
+.strip{background:var(--glass-strong);backdrop-filter:blur(12px);padding:16px 0;overflow:hidden;
+        border-top:1px solid var(--glass-border);border-bottom:1px solid var(--glass-border);}
+.strip-inner{display:flex;animation:marquee 20s linear infinite;white-space:nowrap;}
+.strip-item{display:inline-flex;align-items:center;gap:8px;padding:0 26px;
+             font-size:13px;font-weight:600;color:var(--fg);}
+.strip-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+@keyframes marquee{to{transform:translateX(-50%)}}
+
+.section{padding:90px 32px;max-width:1280px;margin:0 auto;}
+.sec-label{font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+            color:var(--violet);margin-bottom:12px;}
+h2{font-family:var(--font-display);font-size:clamp(28px,3vw,42px);font-weight:400;
+    line-height:1.15;letter-spacing:-0.01em;margin-bottom:48px;color:var(--fg);}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+.step{padding:32px 28px;position:relative;overflow:hidden;}
+.step{
+    transition:all .35s ease;
+    cursor:pointer;
+}
+
+.step:hover{
+    transform:translateY(-10px) scale(1.02);
+    box-shadow:0 25px 60px rgba(0,0,0,.35);
+    border:1px solid rgba(255,255,255,.15);
+}
+.step-badge{
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:26px;
+    margin-bottom:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+.step-title{font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:10px;color:var(--fg);}
+.step-desc{font-size:14px;color:var(--muted);line-height:1.7;font-weight:400;}
+
+.teacher-card{
+    padding:24px;
+    border-radius:24px;
+    transition:all .35s ease;
+    position:relative;
+    overflow:hidden;
+}
+.teacher-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 25px 50px rgba(0,0,0,.35);
+}
+.tc-top{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-bottom:18px;
+}
+.tc-name{
+    font-family:var(--font-display);
+    font-size:22px;
+    color:var(--fg);
+    font-weight:600;
+}
+.tc-loc{
+    font-size:13px;
+    color:#A8B3CF;
+    margin-top:4px;
+    font-weight:500;
+}
+.tc-bio{
+    font-size:14px;
+    color:var(--muted);
+    line-height:1.8;
+    margin-bottom:18px;
+}
+.tc-foot{display:flex;align-items:center;justify-content:space-between;}
+.rating{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:var(--fg);}
+.rating span{color:var(--muted);font-weight:500;}
+
+.cta-band{background:var(--grad-main);padding:80px 32px;text-align:center;border-radius:32px;
+           max-width:1280px;margin:0 auto 60px;}
+@media(max-width:900px){.steps{grid-template-columns:1fr;}.section{padding:60px 20px;}}
+.view-profile-btn{
+    display:inline-block;
+    padding:8px 16px;
+    border-radius:10px;
+    background:linear-gradient(135deg,#2563EB,#06B6D4);
+    color:#fff;
+    font-size:14px;
+    font-weight:600;
+    text-decoration:none;
+    margin-top:12px;
+    transition:.3s;
+}
+
+.view-profile-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(37,99,235,.30);
+}
+.trending-skills{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:18px;
+    margin-top:35px;
+}
+
+.skill-chip{
+    padding:14px 24px;
+    border-radius:50px;
+    text-decoration:none;
+    color:white;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(18px);
+    transition:.3s;
+    font-weight:600;
+}
+
+.skill-chip:hover{
+    background:linear-gradient(135deg,#2563EB,#06B6D4);
+    transform:translateY(-4px);
+    box-shadow:0 12px 25px rgba(37,99,235,.35);
+}
+.hero-tags{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:28px;
+}
+
+.hero-tag{
+    padding:10px 18px;
+    border-radius:50px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.10);
+    color:#fff;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:500;
+    transition:.3s;
+}
+
+.hero-tag:hover{
+    background:linear-gradient(135deg,#2563EB,#06B6D4);
+    transform:translateY(-3px);
+}
+
+</style>
+
+<section class="hero-wrap">
+  <h1 class="hero-h1 animate-fade-rise">Where <em>passion</em> becomes <em>practiced skill.</em></h1>
+  <p class="hero-sub animate-fade-rise-delay">We connect curious minds with real teachers — for coding, languages, art, music, and everything in between. No classrooms, no pressure, just people sharing what they know.</p>
+  <div class="hero-search">
+    <form action="{{ url_for('search') }}" method="GET">
+        <div class="search-box">
+            <input
+                type="text"
+                name="q"
+                placeholder="Search skills like Python, Guitar, Japanese..."
+                class="search-input"
+            >
+            <button type="submit" class="search-btn">
+                🔍 Search
+            </button>
+        </div>
+    </form>
+</div>
+<div class="hero-tags">
+
+    <a href="{{ url_for('search') }}?q=Programming" class="hero-tag">💻 Programming</a>
+
+    <a href="{{ url_for('search') }}?q=Languages" class="hero-tag">🌍 Languages</a>
+
+    <a href="{{ url_for('search') }}?q=Music" class="hero-tag">🎸 Music</a>
+
+    <a href="{{ url_for('search') }}?q=Design" class="hero-tag">🎨 Design</a>
+
+    <a href="{{ url_for('search') }}?q=Cooking" class="hero-tag">🍳 Cooking</a>
+
+</div>
+  <div class="hero-cta-row animate-fade-rise-delay-2">
+    <a href="{{ url_for('search') }}" class="liquid-glass hero-cta-glass">Begin Your Journey</a>
+    <a href="{{ url_for('register') }}" class="btn btn-outline" style="padding:18px 32px;">Start Teaching</a>
+  </div>
+  <div class="hero-stats animate-fade-rise-delay-2">
+    <div><div class="stat-n">{{ total_teachers }}+</div><div class="stat-l">Active teachers</div></div>
+    <div><div class="stat-n">{{ total_skills }}+</div><div class="stat-l">Skills available</div></div>
+    <div><div class="stat-n" style="color:var(--mint)">Free</div><div class="stat-l">To get started</div></div>
+  </div>
+</section>
+
+<div class="strip">
+  <div class="strip-inner">
+    {% set skills_list = [('Japanese','#9C8CFF'),('Python','#2FE3B4'),('Watercolor','#FF6B81'),('Guitar','#FFD166'),('French','#9C8CFF'),('Embroidery','#FF6B81'),('Yoga','#5DD2FF'),('Cooking','#FF6B81'),('Calligraphy','#FFD166'),('Web Design','#2FE3B4')] %}
+    {% for name, color in skills_list + skills_list %}
+      <span class="strip-item"><span class="strip-dot" style="background:{{ color }}"></span>{{ name }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<section class="section" id="how-it-works">
+ <div class="steps">
+
+    <div class="step glass">
+        <div class="step-badge" style="background:var(--violet)">🔍</div>
+        <div class="step-title">Discover Skills</div>
+        <p class="step-desc">
+            Search thousands of skills like Python, UI/UX, Guitar, Japanese, Cooking and more.
+        </p>
+    </div>
+
+    <div class="step glass">
+        <div class="step-badge" style="background:var(--coral)">🤝</div>
+        <div class="step-title">Connect with Mentors</div>
+        <p class="step-desc">
+            Browse mentor profiles, compare ratings, experience, and choose the right person.
+        </p>
+    </div>
+
+    <div class="step glass">
+        <div class="step-badge" style="background:var(--mint)">🎓</div>
+        <div class="step-title">Start Learning</div>
+        <p class="step-desc">
+            Chat with mentors, book sessions, and build your skills at your own pace.
+        </p>
+    </div>
+
+</div>
+</section>
+<section class="section">
+
+    <div class="sec-label">Trending Skills</div>
+
+    <h2>Explore Popular Skills</h2>
+
+    <div class="trending-skills">
+
+        <a href="{{ url_for('search') }}?q=Python" class="skill-chip">🐍 Python</a>
+
+        <a href="{{ url_for('search') }}?q=Java" class="skill-chip">☕ Java</a>
+
+        <a href="{{ url_for('search') }}?q=JavaScript" class="skill-chip">🟨 JavaScript</a>
+
+        <a href="{{ url_for('search') }}?q=UI/UX" class="skill-chip">🎨 UI/UX</a>
+
+        <a href="{{ url_for('search') }}?q=AI" class="skill-chip">🤖 AI</a>
+
+        <a href="{{ url_for('search') }}?q=Machine Learning" class="skill-chip">🧠 Machine Learning</a>
+
+        <a href="{{ url_for('search') }}?q=Guitar" class="skill-chip">🎸 Guitar</a>
+
+        <a href="{{ url_for('search') }}?q=Japanese" class="skill-chip">🇯🇵 Japanese</a>
+
+        <a href="{{ url_for('search') }}?q=Photography" class="skill-chip">📷 Photography</a>
+
+        <a href="{{ url_for('search') }}?q=Cooking" class="skill-chip">🍳 Cooking</a>
+
+    </div>
+
+</section>
+<section class="section">
+    <div class="sec-label">Featured Teachers</div>
+
+    <h2>People you'll love learning from.</h2>
+
+    <div class="grid-3">
+
+        {% for teacher in featured %}
+
+        <a href="{{ url_for('profile', user_id=teacher.id) }}"
+           class="teacher-card glass"
+           style="text-decoration:none;color:inherit;">
+
+            <div class="tc-top">
+
+                <div class="avatar avatar-md"
+                     style="background:{{ user_accent(teacher) }};">
+
+                    {% if teacher.avatar_url %}
+                        <img src="{{ teacher.avatar_url }}"
+                             alt="{{ teacher.username }}">
+                    {% else %}
+                        {{ teacher.username[0].upper() }}
+                    {% endif %}
+
+                </div>
+
+                <div>
+                    <div class="tc-name">
+                        {{ teacher.username }}
+                    </div>
+
+                    <div class="tc-loc">
+                        📍 {{ teacher.location or "Online" }}
+                    </div>
+                </div>
+
+            </div>
+
+            <p class="tc-bio">
+                {{ teacher.bio[:120] }}
+                {% if teacher.bio|length > 120 %}...{% endif %}
+            </p>
+
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
+
+                {% for s in teacher.skills.limit(3).all() %}
+
+                    <span class="tag"
+                          style="background:{{ category_color(s.category) }}33;
+                                 color:{{ category_color(s.category) }};">
+                        {{ s.name }}
+                    </span>
+
+                {% endfor %}
+
+            </div>
+
+            <div class="tc-foot">
+
+                {% if teacher.is_paid %}
+
+                    <span class="tag"
+                          style="background:#FFD16633;color:#FFD166;">
+                        {{ teacher.currency }}
+                        {{ teacher.hourly_rate|int }}/hr
+                    </span>
+
+                {% else %}
+
+                    <span class="tag"
+                          style="background:#2FE3B433;color:#7CFFDB;">
+                        Free
+                    </span>
+
+                {% endif %}
+
+                {% if teacher.avg_rating %}
+                    <div class="rating">
+                        ★ {{ teacher.avg_rating }}
+                        <span>({{ teacher.review_count }})</span>
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+
+</a>
+
+{% endfor %}
+
+    </div>
+
+</section>
+<section class="section">
+
+    <div class="sec-label">Why SkillTribe?</div>
+
+    <h2>Learn directly from people, not institutions.</h2>
+
+    <div class="steps">
+
+        <div class="step glass">
+            <div class="step-badge" style="background:#2563EB;">🌍</div>
+            <div class="step-title">Global Community</div>
+            <p class="step-desc">
+                Discover teachers from different countries and cultures.
+            </p>
+        </div>
+
+        <div class="step glass">
+            <div class="step-badge" style="background:#2FE3B4;">⚡</div>
+            <div class="step-title">Learn Faster</div>
+            <p class="step-desc">
+                Skip long courses and learn directly from experienced people.
+            </p>
+        </div>
+
+        <div class="step glass">
+            <div class="step-badge" style="background:#9C8CFF;">💬</div>
+            <div class="step-title">Connect Instantly</div>
+            <p class="step-desc">
+                Chat, schedule sessions and start learning within minutes.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+<section class="section">
+
+    <div class="sec-label">Success Stories</div>
+
+    <h2>People growing through SkillTribe.</h2>
+
+    <div class="grid-3">
+
+        <div class="teacher-card glass">
+            <h3>👩 Priya</h3>
+            <p class="step-desc">
+                "I found a Japanese mentor and cleared JLPT N5 in 8 months."
+            </p>
+        </div>
+
+        <div class="teacher-card glass">
+            <h3>👨 David</h3>
+            <p class="step-desc">
+                "Started teaching Python on weekends and earned my first online income."
+            </p>
+        </div>
+
+        <div class="teacher-card glass">
+            <h3>👩 Aiko</h3>
+            <p class="step-desc">
+                "Connected with students from India and made friends while teaching Japanese."
+            </p>
+        </div>
+
+    </div>
+
+</section>
+<section class="cta-band">
+  <p style="font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.85);margin-bottom:12px;font-weight:700;">Ready to start?</p>
+  <h2 style="color:#fff;margin-bottom:28px;max-width:520px;margin-left:auto;margin-right:auto;">
+    Your next skill is waiting for you.
+  </h2>
+  <a href="{{ url_for('register') }}" class="btn btn-dark" style="font-size:16px;padding:14px 32px;">Join Skill<span class="logo-tribe">Tribe</span> free →</a>
+</section>
+{% endblock %}

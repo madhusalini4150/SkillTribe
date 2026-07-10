@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Explore Skills{% endblock %}
+{% block content %}
+<style>
+.search-hero{padding:60px 32px 40px;text-align:center;max-width:900px;margin:0 auto;}
+.search-hero h2{font-family:var(--font-display);font-size:40px;color:var(--fg);margin-bottom:6px;font-weight:400;}
+.search-hero p{color:var(--muted);font-size:15px;margin-bottom:32px;}
+.search-bar{display:flex;max-width:540px;margin:0 auto 20px;border-radius:100px;
+             padding:6px 6px 6px 22px;}
+.search-bar input{flex:1;border:none;outline:none;font-family:var(--font-body);
+                    font-size:15px;background:transparent;color:var(--fg);font-weight:500;}
+.search-bar input::placeholder{color:var(--muted);}
+.search-bar button{
+    background:linear-gradient(135deg,#2563EB,#06B6D4);
+    color:#fff;
+    border:none;
+    border-radius:100px;
+    padding:12px 26px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.3s;
+}
+.search-bar button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(37,99,235,.35);
+}
+.filter-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.chip{padding:7px 16px;border-radius:100px;border:1px solid var(--glass-border);
+       color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:var(--tr);background:var(--glass);}
+.chip:hover,.chip.active{background:var(--violet);border-color:var(--violet);color:#fff;}
+.results-area{padding:30px 32px 80px;max-width:1280px;margin:0 auto;}
+.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;}
+.results-count{font-size:14px;color:var(--muted);font-weight:500;}
+.teacher-card{padding:24px;}
+.tc-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.tc-name{font-family:var(--font-display);font-size:18px;color:var(--fg);}
+.tc-loc{font-size:12px;color:var(--muted);margin-top:2px;font-weight:500;}
+.tc-bio{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.tc-foot{display:flex;align-items:center;justify-content:space-between;}
+.rating{font-size:13px;font-weight:600;color:var(--fg);}
+.empty{text-align:center;padding:80px 20px;color:var(--muted);}
+.empty h3{font-family:var(--font-display);font-size:28px;margin-bottom:10px;color:var(--fg);font-weight:400;}
+.pagination{display:flex;justify-content:center;gap:8px;margin-top:40px;flex-wrap:wrap;}
+.page-btn{padding:8px 16px;border-radius:100px;border:1px solid var(--glass-border);background:var(--glass);
+           font-size:14px;font-weight:600;color:var(--fg);cursor:pointer;transition:var(--tr);}
+.page-btn:hover,.page-btn.current{background:var(--violet);border-color:var(--violet);}
+@media(max-width:768px){.search-hero,.results-area{padding:40px 20px;}}
+</style>
+
+<div class="search-hero">
+ <h2>Discover Your Next Mentor</h2>
+
+<p>
+Learn coding, languages, music, design, cooking and hundreds of other skills
+from passionate people around the world.
+</p>
+  <form method="GET" action="{{ url_for('search') }}">
+    <div class="search-bar glass">
+      <input type="text" name="q" value="{{ q }}" placeholder="What do you want to learn?"/>
+      <button type="submit">Search</button>
+    </div>
+    <div class="filter-row">
+      <a href="{{ url_for('search') }}" class="chip {% if not category and not free_only %}active{% endif %}">All skills</a>
+      {% for cat in all_categories %}
+        <a href="{{ url_for('search', category=cat, q=q) }}"
+           class="chip {% if category == cat %}active{% endif %}">{{ cat }}</a>
+      {% endfor %}
+      <a href="{{ url_for('search', q=q, free_only='y') }}"
+         class="chip {% if free_only %}active{% endif %}">Free only</a>
+    </div>
+  </form>
+</div>
+
+<div class="results-area">
+  <div class="results-header">
+    <div class="results-count">
+      {% if q %}Results for "<strong style="color:var(--fg)">{{ q }}</strong>" — {% endif %}
+      {{ pagination.total }} teacher{{ 's' if pagination.total != 1 }}
+    </div>
+  </div>
+
+  {% if teachers %}
+    <div class="grid-3">
+      {% for t in teachers %}
+      <a href="{{ url_for('profile', user_id=t.id) }}" class="teacher-card glass" style="text-decoration:none;color:inherit;">
+        <div class="tc-top">
+          <div class="avatar avatar-md" style="background:{{ user_accent(t) }};">
+            {% if t.avatar_url %}<img src="{{ t.avatar_url }}" alt="{{ t.username }}">{% else %}{{ t.username[0].upper() }}{% endif %}
+          </div>
+          <div>
+            <div class="tc-name">{{ t.username }}</div>
+            <div class="tc-loc">📍 {{ t.location or 'Online' }}</div>
+          </div>
+        </div>
+        <p class="tc-bio">{{ t.bio[:110] }}{% if t.bio|length > 110 %}…{% endif %}</p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+          {% for s in t.skills.limit(3).all() %}<span class="tag" style="background:{{ category_color(s.category) }}33;color:{{ category_color(s.category) }};">{{ s.name }}</span>{% endfor %}
+        </div>
+        <div class="tc-foot">
+          {% if not t.is_paid %}<span class="tag" style="background:#2FE3B433;color:#7CFFDB;">Free</span>
+          {% else %}<span class="tag" style="background:#FFD16633;color:#FFE7AD;">{{ t.currency }} {{ t.hourly_rate|int }}/hr</span>{% endif %}
+          {% if t.avg_rating %}<div class="rating">★ {{ t.avg_rating }} <span style="color:var(--muted);font-weight:500">({{ t.review_count }})</span></div>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <div class="pagination">
+      {% if pagination.has_prev %}
+        <a href="{{ url_for('search', q=q, category=category, page=pagination.prev_num) }}" class="page-btn">← Prev</a>
+      {% endif %}
+      {% for p in pagination.iter_pages() %}
+        {% if p %}
+          <a href="{{ url_for('search', q=q, category=category, page=p) }}"
+             class="page-btn {% if p == pagination.page %}current{% endif %}">{{ p }}</a>
+        {% endif %}
+      {% endfor %}
+      {% if pagination.has_next %}
+        <a href="{{ url_for('search', q=q, category=category, page=pagination.next_num) }}" class="page-btn">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  {% else %}
+    <div class="empty">
+      <h3>No teachers found.</h3>
+      <p>Try a different search term or <a href="{{ url_for('register') }}" style="color:var(--violet);font-weight:700;">become the first teacher</a> for this skill!</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

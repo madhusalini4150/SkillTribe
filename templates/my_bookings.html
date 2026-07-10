@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+
+<div class="container" style="max-width:1100px;margin:40px auto;">
+
+    <h1 style="margin-bottom:30px;font-family:var(--font-display);">
+        📚 My Bookings
+    </h1>
+
+    <!-- Student Bookings -->
+    <div class="glass" style="padding:25px;margin-bottom:30px;">
+
+        <h2 style="margin-bottom:20px;">
+            Sessions I Booked
+        </h2>
+
+        {% if student_bookings %}
+
+            {% for booking in student_bookings %}
+
+            <div class="glass"
+                 style="padding:18px;margin-bottom:15px;">
+
+                <h3>{{ booking.teacher.username }}</h3>
+
+                <p>
+                    Amount:
+                    <strong>
+                        {{ booking.currency }}
+                        {{ booking.amount }}
+                    </strong>
+                </p>
+
+                <p>Status: {{ booking.status }}</p>
+
+                <p>
+                    Date:
+                    {{ booking.created_at.strftime("%d %b %Y %I:%M %p") }}
+                </p>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No bookings yet.</p>
+
+        {% endif %}
+
+    </div>
+
+    <!-- Teacher Bookings -->
+    <div class="glass" style="padding:25px;">
+
+        <h2 style="margin-bottom:20px;">
+            Students Who Booked Me
+        </h2>
+
+        {% if teacher_bookings %}
+
+            {% for booking in teacher_bookings %}
+
+            <div class="glass"
+                 style="padding:18px;margin-bottom:15px;">
+
+                <h3>{{ booking.student.username }}</h3>
+
+                <p>
+                    Amount:
+                    <strong>
+                        {{ booking.currency }}
+                        {{ booking.amount }}
+                    </strong>
+                </p>
+
+                <p>Status: {{ booking.status }}</p>
+
+                <p>
+                    Date:
+                    {{ booking.created_at.strftime("%d %b %Y %I:%M %p") }}
+                </p>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No students have booked you yet.</p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

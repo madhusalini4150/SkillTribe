@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+<div class="container page-pad">
+  <h2 style="font-family:var(--font-display);font-size:30px;margin-bottom:6px;color:var(--fg);font-weight:400;">Inbox</h2>
+  <p style="color:var(--muted);margin-bottom:28px;">All your received messages.</p>
+  {% if messages %}
+    {% for msg in messages %}
+    <a href="{{ url_for('conversation', user_id=msg.sender_id) }}" style="text-decoration:none;color:inherit;">
+      <div class="glass" style="display:flex;align-items:center;gap:14px;padding:18px;margin-bottom:10px;{% if not msg.is_read %}border-color:var(--violet);{% endif %}">
+        <div class="avatar avatar-sm" style="background:{{ user_accent(msg.sender) }};">
+          {% if msg.sender.avatar_url %}<img src="{{ msg.sender.avatar_url }}" alt="">{% else %}{{ msg.sender.username[0].upper() }}{% endif %}
+        </div>
+        <div style="flex:1;">
+          <div style="font-weight:600;font-size:15px;color:var(--fg);">{{ msg.sender.username }}</div>
+          <div style="font-size:13px;color:var(--muted);">{{ msg.body[:80] }}{% if msg.body|length > 80 %}…{% endif %}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);">{{ msg.created_at.strftime('%d %b %Y') }}</div>
+      </div>
+    </a>
+    {% endfor %}
+  {% else %}
+    <div class="glass" style="text-align:center;padding:80px;color:var(--muted);">
+      <p style="font-size:18px;margin-bottom:12px;color:var(--fg);">Your inbox is empty.</p>
+      <a href="{{ url_for('search') }}" class="btn btn-grad">Find a teacher to message</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

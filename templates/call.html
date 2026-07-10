@@ -1,0 +1,468 @@
+{% extends "base.html" %}
+{% block title %}Call with {{ other.username }}{% endblock %}
+{% block content %}
+<style>
+/* ── CALL PAGE ── */
+.call-page{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;
+            background:rgba(3,8,20,0.95);backdrop-filter:blur(20px);}
+
+/* Videos */
+.videos-wrap{position:relative;flex:1;background:#000;overflow:hidden;}
+#remoteVideo{width:100%;height:100%;object-fit:cover;display:block;}
+#localVideo{position:absolute;bottom:24px;right:24px;width:180px;height:135px;
+             object-fit:cover;border-radius:16px;border:2px solid rgba(255,255,255,0.2);
+             box-shadow:0 8px 28px rgba(0,0,0,0.5);z-index:10;background:#111;}
+.video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;
+                    align-items:center;justify-content:center;color:rgba(255,255,255,0.6);}
+.video-placeholder .big-avatar{width:110px;height:110px;border-radius:50%;
+                                 display:flex;align-items:center;justify-content:center;
+                                 font-size:42px;font-weight:800;margin-bottom:18px;color:#fff;}
+.video-placeholder h3{font-family:var(--font-display);font-size:24px;color:#fff;margin-bottom:6px;}
+.video-placeholder p{font-size:14px;opacity:0.7;}
+
+/* Status overlay */
+.call-status{position:absolute;top:24px;left:50%;transform:translateX(-50%);
+              background:rgba(0,0,0,0.55);backdrop-filter:blur(8px);
+              border:1px solid rgba(255,255,255,0.12);border-radius:100px;
+              padding:8px 20px;font-size:13px;font-weight:600;color:#fff;
+              display:flex;align-items:center;gap:8px;z-index:20;}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#2FE3B4;
+             animation:pulse-dot 1.5s ease-in-out infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.7);}}
+.status-dot.ringing{background:var(--sun);}
+.status-dot.ended{background:var(--coral);animation:none;}
+
+/* Controls bar */
+.controls{display:flex;align-items:center;justify-content:center;
+           gap:16px;padding:24px 32px;background:rgba(3,8,20,0.8);
+           border-top:1px solid rgba(255,255,255,0.08);}
+.ctrl-btn{width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;
+           display:flex;align-items:center;justify-content:center;font-size:22px;
+           transition:all 0.18s ease;flex-shrink:0;}
+.ctrl-btn:hover{transform:scale(1.1);}
+.ctrl-btn:active{transform:scale(0.94);}
+.ctrl-btn.mic{background:rgba(255,255,255,0.15);}
+.ctrl-btn.cam{background:rgba(255,255,255,0.15);}
+.ctrl-btn.off{background:rgba(255,255,255,0.07);opacity:0.55;}
+.ctrl-btn.end-call{background:#FF4560;width:64px;height:64px;font-size:24px;
+                    box-shadow:0 6px 20px rgba(255,69,96,0.4);}
+.ctrl-btn.end-call:hover{background:#e03550;box-shadow:0 8px 28px rgba(255,69,96,0.55);}
+.ctrl-label{font-size:11px;color:rgba(255,255,255,0.5);margin-top:5px;font-weight:600;}
+.ctrl-group{display:flex;flex-direction:column;align-items:center;gap:0;}
+
+/* Top bar */
+.call-topbar{display:flex;align-items:center;justify-content:space-between;
+              padding:16px 24px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.call-topbar-logo{font-family:var(--font-display);font-size:18px;color:#fff;}
+.call-topbar-logo span{background:var(--grad-main);-webkit-background-clip:text;background-clip:text;
+                        -webkit-text-fill-color:transparent;}
+.call-timer{font-size:14px;color:rgba(255,255,255,0.6);font-weight:600;font-variant-numeric:tabular-nums;}
+
+/* Incoming call overlay */
+.incoming-overlay{position:fixed;inset:0;z-index:300;
+                   background:rgba(3,8,20,0.96);backdrop-filter:blur(20px);
+                   display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+                   gap:20px;}
+.incoming-overlay .big-avatar{width:120px;height:120px;border-radius:50%;
+                                display:flex;align-items:center;justify-content:center;
+                                font-size:48px;font-weight:800;color:#fff;margin-bottom:8px;}
+.incoming-overlay h2{font-family:var(--font-display);font-size:28px;color:#fff;font-weight:400;}
+.incoming-overlay p{color:rgba(255,255,255,0.6);font-size:16px;}
+.incoming-btns{display:flex;gap:20px;margin-top:12px;}
+.btn-answer{background:#2FE3B4;color:#0a2018;padding:16px 36px;border-radius:100px;
+             border:none;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.18s;font-family:var(--font-body);}
+.btn-answer:hover{filter:brightness(1.1);transform:translateY(-2px);}
+.btn-reject{background:rgba(255,69,96,0.2);color:#FF4560;padding:16px 36px;border-radius:100px;
+             border:1px solid rgba(255,69,96,0.4);font-size:16px;font-weight:700;cursor:pointer;
+             transition:all 0.18s;font-family:var(--font-body);}
+.btn-reject:hover{background:rgba(255,69,96,0.35);}
+.ringing-anim{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:6px;}
+.ring-dot{width:10px;height:10px;border-radius:50%;background:#2FE3B4;
+           animation:ring-bounce 1.2s ease-in-out infinite;}
+.ring-dot:nth-child(2){animation-delay:0.2s;}
+.ring-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes ring-bounce{0%,80%,100%{transform:scale(0.6);opacity:0.4;}40%{transform:scale(1.2);opacity:1;}}
+
+/* Mode toggle (voice-only) */
+.mode-label{font-size:12px;color:rgba(255,255,255,0.4);text-align:center;margin:0 16px;}
+</style>
+
+<!-- Incoming call overlay — shown only to callee before answering -->
+{% if not is_caller %}
+<div class="incoming-overlay" id="incomingOverlay">
+  <div class="big-avatar" style="background:{{ user_accent(other) }};">{{ other.username[0].upper() }}</div>
+  <h2>{{ other.username }} is calling…</h2>
+  <p>Incoming video call</p>
+  <div class="ringing-anim"><div class="ring-dot"></div><div class="ring-dot"></div><div class="ring-dot"></div></div>
+  <div class="incoming-btns">
+    <button class="btn-answer" onclick="answerCall()">📞 Answer</button>
+    <button class="btn-reject" onclick="rejectCall()">✕ Decline</button>
+  </div>
+</div>
+{% endif %}
+
+<div class="call-page">
+  <!-- Top bar -->
+  <div class="call-topbar">
+    <div class="call-topbar-logo">Skill<span>Tribe</span></div>
+    <div id="callTimer" class="call-timer" style="display:none;">00:00</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.5);">
+      Call with <strong style="color:#fff">{{ other.username }}</strong>
+    </div>
+  </div>
+
+  <!-- Videos -->
+  <div class="videos-wrap">
+    <!-- Status chip -->
+    <div class="call-status" id="callStatus">
+      <span class="status-dot ringing" id="statusDot"></span>
+      <span id="statusText">{% if is_caller %}Calling {{ other.username }}…{% else %}Incoming call…{% endif %}</span>
+    </div>
+
+    <!-- Remote video (full screen) -->
+    <video id="remoteVideo" autoplay playsinline></video>
+
+    <!-- Placeholder shown before remote stream arrives -->
+    <div class="video-placeholder" id="remotePlaceholder">
+      <div class="big-avatar" style="background:{{ user_accent(other) }};">{{ other.username[0].upper() }}</div>
+      <h3>{{ other.username }}</h3>
+      <p id="placeholderText">{% if is_caller %}Waiting for {{ other.username }} to answer…{% else %}Connecting…{% endif %}</p>
+    </div>
+
+    <!-- Local video (pip) -->
+    <video id="localVideo" autoplay playsinline muted></video>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="ctrl-group">
+      <button class="ctrl-btn mic" id="micBtn" onclick="toggleMic()" title="Toggle microphone">🎙️</button>
+      <div class="ctrl-label">Mic</div>
+    </div>
+    <div class="ctrl-group">
+      <button class="ctrl-btn cam" id="camBtn" onclick="toggleCam()" title="Toggle camera">📷</button>
+      <div class="ctrl-label">Camera</div>
+    </div>
+    <div class="ctrl-group">
+      <button class="ctrl-btn end-call" onclick="endCall()" title="End call">📵</button>
+      <div class="ctrl-label" style="color:var(--coral);">End</div>
+    </div>
+    <div class="ctrl-group">
+      <button class="ctrl-btn" id="voiceOnlyBtn" onclick="toggleVoiceOnly()"
+              style="background:rgba(255,255,255,0.15);" title="Switch to voice only">🎧</button>
+      <div class="ctrl-label">Voice only</div>
+    </div>
+    <div class="ctrl-group">
+      <a href="{{ url_for('conversation', user_id=other.id) }}"
+         class="ctrl-btn" style="background:rgba(255,255,255,0.1);text-decoration:none;" title="Open chat">💬</a>
+      <div class="ctrl-label">Chat</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════════
+const ROOM_ID    = {{ room_id | tojson }};
+const IS_CALLER  = {{ is_caller | tojson }};
+const OTHER_NAME = {{ other.username | tojson }};
+const MY_ID      = {{ current_user.id | tojson }};
+
+// Google's free STUN servers — no sign-up or cost needed
+const ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+  ]
+};
+
+// ══════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════
+let localStream  = null;
+let peerConn     = null;
+let micOn        = true;
+let camOn        = true;
+let voiceOnly    = false;
+let callActive   = false;
+let timerInt     = null;
+let timerSecs    = 0;
+
+const socket     = io();
+
+// ══════════════════════════════════════════════════════════════
+//  UI HELPERS
+// ══════════════════════════════════════════════════════════════
+function setStatus(text, state = 'active') {
+  document.getElementById('statusText').textContent = text;
+  const dot = document.getElementById('statusDot');
+  dot.className = 'status-dot' + (state === 'ringing' ? ' ringing' : state === 'ended' ? ' ended' : '');
+}
+
+function startTimer() {
+  const el = document.getElementById('callTimer');
+  el.style.display = 'block';
+  timerInt = setInterval(() => {
+    timerSecs++;
+    const m = String(Math.floor(timerSecs / 60)).padStart(2,'0');
+    const s = String(timerSecs % 60).padStart(2,'0');
+    el.textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function showRemoteStream() {
+  document.getElementById('remotePlaceholder').style.display = 'none';
+  setStatus('Connected · ' + OTHER_NAME, 'active');
+  startTimer();
+  callActive = true;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MEDIA
+// ══════════════════════════════════════════════════════════════
+async function getLocalMedia(videoEnabled = true) {
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: videoEnabled
+    });
+    document.getElementById('localVideo').srcObject = localStream;
+  } catch (err) {
+    // Fall back to audio-only if camera permission is denied
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      document.getElementById('localVideo').srcObject = localStream;
+      voiceOnly = true;
+      updateCamBtn();
+    } catch (e) {
+      alert('Could not access microphone. Please allow microphone permission and reload.');
+    }
+  }
+}
+
+function toggleMic() {
+  if (!localStream) return;
+  micOn = !micOn;
+  localStream.getAudioTracks().forEach(t => t.enabled = micOn);
+  const btn = document.getElementById('micBtn');
+  btn.textContent = micOn ? '🎙️' : '🔇';
+  btn.className   = 'ctrl-btn mic' + (micOn ? '' : ' off');
+}
+
+function toggleCam() {
+  if (!localStream) return;
+  camOn = !camOn;
+  localStream.getVideoTracks().forEach(t => t.enabled = camOn);
+  const btn = document.getElementById('camBtn');
+  btn.textContent = camOn ? '📷' : '🚫';
+  btn.className   = 'ctrl-btn cam' + (camOn ? '' : ' off');
+}
+
+function updateCamBtn() {
+  const btn = document.getElementById('camBtn');
+  btn.textContent = '🚫';
+  btn.className   = 'ctrl-btn cam off';
+}
+
+async function toggleVoiceOnly() {
+  voiceOnly = !voiceOnly;
+  const btn = document.getElementById('voiceOnlyBtn');
+  if (voiceOnly) {
+    // Stop video tracks
+    if (localStream) localStream.getVideoTracks().forEach(t => { t.stop(); });
+    btn.className = 'ctrl-btn off';
+    btn.title     = 'Switch back to video';
+    camOn = false;
+    updateCamBtn();
+  } else {
+    // Restart with video
+    await getLocalMedia(true);
+    if (peerConn && localStream) {
+      const sender = peerConn.getSenders().find(s => s.track && s.track.kind === 'video');
+      const vt     = localStream.getVideoTracks()[0];
+      if (sender && vt) sender.replaceTrack(vt);
+    }
+    btn.className = 'ctrl-btn';
+    btn.title     = 'Switch to voice only';
+    camOn = true;
+    const cb = document.getElementById('camBtn');
+    cb.textContent = '📷'; cb.className = 'ctrl-btn cam';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  WEBRTC
+// ══════════════════════════════════════════════════════════════
+function createPeerConnection() {
+  peerConn = new RTCPeerConnection(ICE_CONFIG);
+
+  // Add local tracks to the connection
+  if (localStream) {
+    localStream.getTracks().forEach(track => peerConn.addTrack(track, localStream));
+  }
+
+  // When remote stream arrives → display it
+  peerConn.ontrack = (event) => {
+    const remoteVideo = document.getElementById('remoteVideo');
+    if (remoteVideo.srcObject !== event.streams[0]) {
+      remoteVideo.srcObject = event.streams[0];
+      showRemoteStream();
+    }
+  };
+
+  // Send ICE candidates to the other peer via signaling server
+  peerConn.onicecandidate = (event) => {
+    if (event.candidate) {
+      socket.emit('ice_candidate', { room_id: ROOM_ID, candidate: event.candidate });
+    }
+  };
+
+  peerConn.onconnectionstatechange = () => {
+    if (peerConn.connectionState === 'disconnected' || peerConn.connectionState === 'failed') {
+      setStatus('Connection lost', 'ended');
+    }
+  };
+}
+
+async function startCall() {
+  await getLocalMedia(!voiceOnly);
+  createPeerConnection();
+  const offer = await peerConn.createOffer();
+  await peerConn.setLocalDescription(offer);
+  socket.emit('call_offer', { room_id: ROOM_ID, sdp: offer });
+  setStatus('Ringing ' + OTHER_NAME + '…', 'ringing');
+}
+
+async function answerCall() {
+  document.getElementById('incomingOverlay').style.display = 'none';
+  await getLocalMedia(!voiceOnly);
+  createPeerConnection();
+  setStatus('Connecting…', 'ringing');
+  // The offer may already be queued — handled by socket event
+  socket.emit('join_call_room', { room_id: ROOM_ID, user_id: MY_ID });
+}
+
+function rejectCall() {
+  socket.emit('call_rejected', { room_id: ROOM_ID });
+  window.location.href = "{{ url_for('profile', user_id=other.id) }}";
+}
+
+function endCall() {
+  socket.emit('call_ended', { room_id: ROOM_ID });
+  cleanUp();
+  setStatus('Call ended', 'ended');
+  clearInterval(timerInt);
+  setTimeout(() => {
+    window.location.href = "{{ url_for('conversation', user_id=other.id) }}";
+  }, 1800);
+}
+
+function cleanUp() {
+  if (peerConn) { peerConn.close(); peerConn = null; }
+  if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+  document.getElementById('localVideo').srcObject  = null;
+  document.getElementById('remoteVideo').srcObject = null;
+  document.getElementById('remotePlaceholder').style.display = 'flex';
+  document.getElementById('placeholderText').textContent = 'Call ended.';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SOCKET EVENTS (signaling)
+// ══════════════════════════════════════════════════════════════
+
+// Queued offer received before peer connection was ready
+let pendingOffer = null;
+
+socket.on('connect', () => {
+  socket.emit('join_call_room', { room_id: ROOM_ID, user_id: MY_ID });
+});
+
+socket.on('peer_joined', async () => {
+  // The callee has joined — caller sends the offer
+  if (IS_CALLER && peerConn) {
+    const offer = await peerConn.createOffer();
+    await peerConn.setLocalDescription(offer);
+    socket.emit('call_offer', { room_id: ROOM_ID, sdp: offer });
+    setStatus('Ringing ' + OTHER_NAME + '…', 'ringing');
+  }
+});
+
+socket.on('call_offer', async (data) => {
+  if (!IS_CALLER) {
+    if (!peerConn) {
+      // Store offer until answerCall() creates the peer connection
+      pendingOffer = data.sdp;
+    } else {
+      await peerConn.setRemoteDescription(new RTCSessionDescription(data.sdp));
+      const answer = await peerConn.createAnswer();
+      await peerConn.setLocalDescription(answer);
+      socket.emit('call_answer', { room_id: ROOM_ID, sdp: answer });
+    }
+  }
+});
+
+socket.on('call_answer', async (data) => {
+  if (peerConn && peerConn.signalingState !== 'stable') {
+    await peerConn.setRemoteDescription(new RTCSessionDescription(data.sdp));
+  }
+});
+
+socket.on('ice_candidate', async (data) => {
+  if (peerConn && data.candidate) {
+    try { await peerConn.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e) {}
+  }
+});
+
+socket.on('call_ended', () => {
+  cleanUp();
+  setStatus('Call ended by ' + OTHER_NAME, 'ended');
+  clearInterval(timerInt);
+  setTimeout(() => {
+    window.location.href = "{{ url_for('conversation', user_id=other.id) }}";
+  }, 1800);
+});
+
+socket.on('call_rejected', () => {
+  cleanUp();
+  setStatus(OTHER_NAME + ' declined the call', 'ended');
+  clearInterval(timerInt);
+  setTimeout(() => {
+    window.location.href = "{{ url_for('profile', user_id=other.id) }}";
+  }, 2000);
+});
+
+// ══════════════════════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', async () => {
+  if (IS_CALLER) {
+    await startCall();
+  }
+  // Callee just shows incoming overlay — no action until they tap Answer
+});
+
+// Handle pending offer after callee answers
+const _origAnswer = answerCall;
+answerCall = async function() {
+  await _origAnswer();
+  if (pendingOffer && peerConn) {
+    await peerConn.setRemoteDescription(new RTCSessionDescription(pendingOffer));
+    const answer = await peerConn.createAnswer();
+    await peerConn.setLocalDescription(answer);
+    socket.emit('call_answer', { room_id: ROOM_ID, sdp: answer });
+    pendingOffer = null;
+  }
+};
+
+// Warn before closing tab during active call
+window.addEventListener('beforeunload', (e) => {
+  if (callActive) {
+    socket.emit('call_ended', { room_id: ROOM_ID });
+    e.returnValue = '';
+  }
+});
+</script>
+{% endblock %}

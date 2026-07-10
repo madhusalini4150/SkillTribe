@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Message {{ recipient.username }}{% endblock %}
+{% block content %}
+<div class="container page-pad" style="max-width:620px;">
+  <div class="glass" style="padding:32px;">
+  <a href="{{ url_for('profile', user_id=recipient.id) }}" style="font-size:14px;color:var(--violet);font-weight:600;">← Back to {{ recipient.username }}'s profile</a>
+  <div style="display:flex;align-items:center;gap:14px;margin:24px 0;">
+    <div class="avatar avatar-md" style="background:{{ user_accent(recipient) }};">
+      {% if recipient.avatar_url %}<img src="{{ recipient.avatar_url }}" alt="">{% else %}{{ recipient.username[0].upper() }}{% endif %}
+    </div>
+    <div>
+      <div style="font-family:var(--font-display);font-size:22px;color:var(--fg);font-weight:400;">Message {{ recipient.username }}</div>
+      <div style="font-size:13px;color:var(--muted);">{{ recipient.location or 'Online' }}</div>
+    </div>
+  </div>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-group">{{ form.body.label(class="form-label") }}{{ form.body(class="form-control", rows=5, placeholder="Introduce yourself and explain what you'd like to learn…") }}
+      {% for e in form.body.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    </div>
+    {{ form.submit(class="btn btn-grad") }}
+  </form>
+  </div>
+</div>
+{% endblock %}

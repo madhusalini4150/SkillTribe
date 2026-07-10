@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Book Session{% endblock %}
+
+{% block content %}
+
+<div style="max-width:700px;margin:60px auto;" class="glass">
+
+    <div style="padding:35px;">
+
+        <h1 style="font-family:var(--font-display);margin-bottom:15px;">
+            Book Session
+        </h1>
+
+        <p>
+            Teacher:
+            <strong>{{ teacher.username }}</strong>
+        </p>
+
+        <br>
+
+        {% if teacher.is_paid %}
+            <h2>
+                {{ teacher.currency }}
+                {{ teacher.hourly_rate|int }}/hr
+            </h2>
+
+            <br>
+
+           <a href="{{ url_for('payment', user_id=teacher.id) }}"
+   class="btn btn-grad btn-full">
+    💳 Continue to Payment
+</a>
+
+        {% else %}
+
+            <h2 style="color:#2FE3B4;">FREE</h2>
+
+            <a href="{{ url_for('send_message', user_id=teacher.id) }}"
+               class="btn btn-grad btn-full">
+                Book Free Session
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

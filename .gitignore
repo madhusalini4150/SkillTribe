@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+venv/
+env/
+.venv/
+
+# Database
+*.db
+instance/
+
+# Environment secrets — NEVER commit this
+.env
+
+# OS / Editor
+.DS_Store
+.vscode/
+*.swp
+
+# Uploaded user content (avatars) — don't commit user-uploaded files
+static/images/*
+!static/images/.gitkeep

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="container page-pad" style="max-width:680px;">
+  <div class="glass" style="padding:36px;">
+  <h2 style="font-family:var(--font-display);font-size:30px;margin-bottom:6px;color:var(--fg);font-weight:400;">Profile settings</h2>
+  <p style="color:var(--muted);margin-bottom:32px;">Update your public profile and teaching preferences.</p>
+
+  <div style="display:flex;align-items:center;gap:18px;margin-bottom:30px;">
+    <div class="avatar avatar-lg" style="background:{{ user_accent(current_user) }};">
+      {% if current_user.avatar_url %}<img src="{{ current_user.avatar_url }}" alt="">{% else %}{{ current_user.username[0].upper() }}{% endif %}
+    </div>
+    <div style="font-size:13px;color:var(--muted);">
+      Current profile photo. Upload a new one below (JPG/PNG/GIF/WebP, max 2MB).
+    </div>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+      {{ form.avatar.label(class="form-label") }}
+      {{ form.avatar(class="form-control") }}
+      {% for e in form.avatar.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="form-group">{{ form.username.label(class="form-label") }}{{ form.username(class="form-control") }}
+      {% for e in form.username.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="form-group">{{ form.bio.label(class="form-label") }}{{ form.bio(class="form-control", rows=4, placeholder="Tell people about yourself and what you teach…") }}
+      {% for e in form.bio.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+    </div>
+    <div class="form-group">{{ form.location.label(class="form-label") }}{{ form.location(class="form-control", placeholder="e.g. Mumbai, India or Online") }}</div>
+    <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;padding:24px;margin-bottom:20px;">
+      <h3 style="font-family:var(--font-display);font-size:17px;margin-bottom:16px;color:var(--fg);font-weight:400;">Teaching settings</h3>
+      <div class="form-check">{{ form.is_teacher() }}{{ form.is_teacher.label(class="form-label",style="margin-bottom:0") }}</div>
+      <div class="form-check">{{ form.is_paid() }}{{ form.is_paid.label(class="form-label",style="margin-bottom:0") }}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
+        <div class="form-group" style="margin:0">{{ form.hourly_rate.label(class="form-label") }}{{ form.hourly_rate(class="form-control", placeholder="e.g. 200") }}</div>
+        <div class="form-group" style="margin:0">{{ form.currency.label(class="form-label") }}{{ form.currency(class="form-control") }}</div>
+      </div>
+    </div>
+    {{ form.submit(class="btn btn-grad") }}
+    <a href="{{ url_for('dashboard') }}" class="btn btn-outline" style="margin-left:10px;">Cancel</a>
+  </form>
+  </div>
+</div>
+{% endblock %}

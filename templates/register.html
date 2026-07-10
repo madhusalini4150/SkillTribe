@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Sign Up{% endblock %}
+{% block content %}
+<style>
+.auth-wrap{min-height:calc(100vh - 78px);display:flex;align-items:center;justify-content:center;padding:60px 24px;}
+.auth-box{width:100%;max-width:420px;padding:40px;}
+.auth-quote{font-family:var(--font-display);font-size:24px;color:var(--fg);line-height:1.3;margin-bottom:28px;text-align:center;font-weight:400;}
+.auth-quote em{font-style:italic;color:var(--sun);}
+.auth-box h2{font-family:var(--font-display);font-size:30px;margin-bottom:6px;color:var(--fg);font-weight:400;}
+.auth-box p{color:var(--muted);font-size:14px;margin-bottom:28px;}
+.auth-switch{font-size:14px;text-align:center;margin-top:20px;color:var(--muted);}
+.auth-switch a{color:var(--violet);font-weight:600;}
+</style>
+<div class="auth-wrap">
+  <div class="auth-box glass">
+    <div class="auth-quote">Share what you know.<br><em>Change lives.</em></div>
+    <h2>Join Skill<span class="logo-tribe">Tribe</span>.</h2>
+    <p>Create your free account and start learning or teaching today.</p>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <div class="form-group">
+        {{ form.username.label(class="form-label") }}
+        {{ form.username(class="form-control", placeholder="e.g. priya_sharma") }}
+        {% for e in form.username.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-group">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control", placeholder="you@example.com") }}
+        {% for e in form.email.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-group">
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control", placeholder="Min. 6 characters") }}
+        {% for e in form.password.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-group">
+        {{ form.confirm.label(class="form-label") }}
+        {{ form.confirm(class="form-control", placeholder="Repeat password") }}
+        {% for e in form.confirm.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+      </div>
+      <div class="form-check">
+        {{ form.is_teacher() }}
+        {{ form.is_teacher.label(class="form-label", style="margin-bottom:0") }}
+      </div>
+      {{ form.submit(class="btn btn-grad btn-full", style="margin-top:8px") }}
+    </form>
+    <p class="auth-switch">Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
+  </div>
+</div>
+{% endblock %}

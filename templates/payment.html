@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Payment{% endblock %}
+
+{% block content %}
+
+<div style="max-width:700px;margin:60px auto;" class="glass">
+
+    <div style="padding:35px;">
+
+        <h1 style="font-family:var(--font-display);margin-bottom:20px;">
+            Payment
+        </h1>
+
+        <p>
+            <strong>Teacher:</strong>
+            {{ teacher.username }}
+        </p>
+
+        <br>
+
+        <p>
+            <strong>Amount:</strong>
+            {{ teacher.currency }}
+            {{ teacher.hourly_rate|int }}
+        </p>
+
+        <br>
+
+        <button id="rzp-button" class="btn btn-grad btn-full">
+            💳 Pay Now
+        </button>
+
+    </div>
+
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+var options = {
+    "key": "{{ razorpay_key }}",
+    "amount": "{{ order.amount }}",
+    "currency": "{{ order.currency }}",
+    "name": "SkillTribe",
+    "description": "Book Session",
+    "order_id": "{{ order.id }}",
+
+    "handler": function (response) {
+
+    fetch("/payment/complete/{{ teacher.id }}", {
+        method: "POST"
+    })
+    .then(response => response.json())
+    .then(data => {
+        window.location.href = data.redirect;
+    });
+
+},
+
+    "theme": {
+        "color": "#5b5df5"
+    }
+};
+
+var rzp = new Razorpay(options);
+
+document.getElementById('rzp-button').onclick = function(e){
+    rzp.open();
+    e.preventDefault();
+}
+</script>
+
+{% endblock %}

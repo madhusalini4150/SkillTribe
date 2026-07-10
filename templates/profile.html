@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+{% block content %}
+<style>
+.profile-header{padding:60px 32px 30px;max-width:1280px;margin:0 auto;display:flex;gap:32px;align-items:flex-start;}
+.prof-meta h1{font-family:var(--font-display);font-size:36px;color:var(--fg);margin-bottom:6px;font-weight:400;}
+.prof-meta .tagline{color:var(--muted);font-size:15px;margin-bottom:18px;}
+.prof-badges{display:flex;gap:8px;flex-wrap:wrap;}
+.pbadge{padding:6px 14px;border-radius:100px;font-size:13px;font-weight:600;
+         background:var(--glass);border:1px solid var(--glass-border);color:var(--fg);}
+.profile-body{padding:20px 32px 80px;max-width:1280px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr;gap:32px;}
+.sec-h3{font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:18px;color:var(--fg);}
+.bio-text{font-size:16px;color:var(--muted);line-height:1.8;}
+.skill-pill{padding:9px 18px;border-radius:100px;font-size:14px;font-weight:700;}
+.contact-card{position:sticky;top:90px;}
+.contact-card h3{font-family:var(--font-display);font-size:20px;margin-bottom:8px;color:var(--fg);font-weight:400;}
+.contact-card p{font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+.price-big{font-family:var(--font-display);font-size:36px;font-weight:400;margin-bottom:18px;color:var(--fg);}
+.review-card{padding:18px;margin-bottom:12px;}
+.rv-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.rv-name{font-weight:600;font-size:14px;color:var(--fg);}
+.rv-date{font-size:12px;color:var(--muted);margin-left:auto;}
+.rv-body{font-size:14px;color:var(--muted);line-height:1.6;}
+.review-form{padding:24px;margin-top:20px;}
+@media(max-width:768px){.profile-header,.profile-body{padding:36px 18px;flex-direction:column;}.profile-body{grid-template-columns:1fr;}}
+</style>
+
+<div class="profile-header">
+  <div class="avatar avatar-lg glass" style="padding:0;background:{{ user_accent(user) }};">
+    {% if user.avatar_url %}<img src="{{ user.avatar_url }}" alt="{{ user.username }}">{% else %}{{ user.username[0].upper() }}{% endif %}
+  </div>
+  <div class="prof-meta">
+    <h1>{{ user.username }}</h1>
+    <p class="tagline">
+      {% if user.is_teacher %}Teacher{% else %}Learner{% endif %}
+      {% if user.location %} · {{ user.location }}{% endif %}
+      {% if user.skills.count() %} · {{ user.skills.count() }} skill{% if user.skills.count() != 1 %}s{% endif %}{% endif %}
+    </p>
+    <div class="prof-badges">
+      {% if user.location %}<span class="pbadge">📍 {{ user.location }}</span>{% endif %}
+      {% if user.avg_rating %}<span class="pbadge">⭐ {{ user.avg_rating }} rating</span>{% endif %}
+      {% if user.review_count %}<span class="pbadge">💬 {{ user.review_count }} review{{ 's' if user.review_count != 1 }}</span>{% endif %}
+      {% if user.is_teacher and not user.is_paid %}<span class="pbadge" style="background:rgba(47,227,180,0.25);border-color:rgba(47,227,180,0.4);">Free to learn</span>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="profile-body">
+  <div>
+    {% if user.bio %}
+    <div class="glass" style="padding:28px;margin-bottom:24px;">
+      <h3 class="sec-h3">About</h3>
+      <p class="bio-text">{{ user.bio }}</p>
+    </div>
+    {% endif %}
+
+    {% if user.skills.count() %}
+    <div class="glass" style="padding:28px;margin-bottom:24px;">
+      <h3 class="sec-h3">Skills</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        {% for s in user.skills.all() %}
+          <span class="skill-pill" style="background:{{ category_color(s.category) }}33;color:{{ category_color(s.category) }};">{{ s.name }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if user.demo_videos %}
+<div class="glass" style="padding:28px;margin-bottom:24px;">
+    <h3 class="sec-h3">Demo Videos</h3>
+
+    {% for video in user.demo_videos %}
+        <div style="margin-bottom:20px;">
+            <h4>{{ video.title }}</h4>
+
+            <video width="100%" height="350" controls>
+                <source src="{{ url_for('static', filename='images/' + video.filename) }}">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+    {% if user.demo_videos %}
+<div class="glass" style="padding:28px;margin-bottom:24px;">
+    <h3 class="sec-h3">📹 Demo Videos</h3>
+
+    {% if user.demo_videos|length > 0 %}
+
+        {% for video in user.demo_videos %}
+
+        <div style="margin-bottom:20px;">
+
+            <h4>{{ video.title }}</h4>
+
+            <video width="100%" controls
+                   style="border-radius:12px;margin-top:10px;">
+
+                <source src="{{ url_for('static',
+                    filename='demo_videos/' + video.filename) }}"
+                    type="video/mp4">
+
+                Your browser does not support video.
+
+            </video>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No demo videos uploaded yet.</p>
+
+    {% endif %}
+</div>
+{% endif %}
+    <div class="glass" style="padding:28px;">
+      <h3 class="sec-h3">Reviews ({{ reviews|length }})</h3>
+      {% if reviews %}
+        {% for rv in reviews %}
+        <div class="review-card" style="background:var(--glass);border-radius:14px;">
+          <div class="rv-top">
+            <div class="avatar avatar-sm" style="background:{{ user_accent(rv.reviewer) }};">
+              {% if rv.reviewer.avatar_url %}<img src="{{ rv.reviewer.avatar_url }}" alt="">{% else %}{{ rv.reviewer.username[0].upper() }}{% endif %}
+            </div>
+            <div>
+              <div class="rv-name">{{ rv.reviewer.username }}</div>
+              <div class="stars">{{ '★' * rv.rating }}{{ '☆' * (5 - rv.rating) }}</div>
+            </div>
+            <div class="rv-date">{{ rv.created_at.strftime('%b %Y') }}</div>
+          </div>
+          {% if rv.comment %}<p class="rv-body">{{ rv.comment }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--muted);font-size:14px;">No reviews yet. Be the first!</p>
+      {% endif %}
+
+      {% if current_user.is_authenticated and current_user.id != user.id and not already_reviewed %}
+      <div class="review-form" style="background:var(--glass);border-radius:16px;">
+        <h4 style="font-family:var(--font-display);font-size:18px;margin-bottom:14px;font-weight:400;color:var(--fg);">Leave a review</h4>
+        <form method="POST" action="{{ url_for('leave_review', user_id=user.id) }}">
+          {{ review_form.hidden_tag() }}
+          <div class="form-group">
+            {{ review_form.rating.label(class="form-label") }}
+            {{ review_form.rating(class="form-control", style="width:80px") }}
+          </div>
+          <div class="form-group">
+            {{ review_form.comment.label(class="form-label") }}
+            {{ review_form.comment(class="form-control", rows=3, placeholder="Share your experience…") }}
+          </div>
+          {{ review_form.submit(class="btn btn-grad") }}
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div>
+    {% if user.is_teacher and current_user.is_authenticated and current_user.id != user.id %}
+    <div class="contact-card glass">
+      <h3>Book a session</h3>
+      <p>Reach out to {{ user.username }} to arrange your first lesson.</p>
+      <div class="price-big">
+        {% if not user.is_paid %}<span style="color:#7CFFDB">Free</span>{% else %}{{ user.currency }} {{ user.hourly_rate|int }}<span style="font-size:16px;font-weight:400;color:var(--muted)">/hr</span>{% endif %}
+      </div>
+      <a href="{{ url_for('book_session', user_id=user.id) }}"
+   class="btn btn-full"
+   style="margin-bottom:10px;background:#FFD166;color:#222;font-weight:700;">
+    💳 Book & Pay
+</a>
+      <a href="{{ url_for('send_message', user_id=user.id) }}" class="btn btn-grad btn-full" style="margin-bottom:10px;">💬 Send message</a>
+      <a href="{{ url_for('call', user_id=user.id) }}" class="btn btn-full" style="margin-bottom:10px;background:#2FE3B4;color:#0a2018;font-weight:700;">📹 Video call</a>
+      <a href="{{ url_for('call', user_id=user.id) }}?voice=1" class="btn btn-outline btn-full" style="margin-bottom:10px;" onclick="sessionStorage.setItem('voiceOnly','1')">🎧 Voice call</a>
+      <a href="{{ url_for('conversation', user_id=user.id) }}" class="btn btn-outline btn-full">View conversation</a>
+    </div>
+    {% elif not current_user.is_authenticated %}
+    <div class="contact-card glass">
+      <h3>Want to connect?</h3>
+      <p>Create a free account to message {{ user.username }} and book a session.</p>
+      <a href="{{ url_for('register') }}" class="btn btn-grad btn-full">Join free</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
