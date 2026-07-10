@@ -48,7 +48,7 @@ razorpay_client = razorpay.Client(
 db.init_app(app)
 migrate   = Migrate(app, db)
 bcrypt    = Bcrypt(app)
-socketio  = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 login_mgr = LoginManager(app)
 login_mgr.login_view      = 'login'
 login_mgr.login_message   = 'Please log in to access this page.'
