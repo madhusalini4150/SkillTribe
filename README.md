@@ -66,8 +66,6 @@ SkillTribe/
 
 ---
 
----
-
 ## 📄 License
 
 This project was developed for educational and portfolio purposes.
