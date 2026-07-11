@@ -58,7 +58,7 @@ SkillTribe/
 ├── wsgi.py
 ├── requirements.txt
 └── README.md
-
+```
 ## 👥 Contributors
 
 - **Madhu Salini** - Developer
