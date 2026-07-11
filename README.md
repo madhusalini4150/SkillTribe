@@ -18,6 +18,10 @@ SkillTribe is a modern skill-sharing platform where users can learn, teach, and 
 
 ![Login Page](static/images/login.png)
 
+## 🏠 Dashboard
+
+![Dashboard](static/images/dashboard.png)
+
 ## 🛠️ Tech Stack
 
 ### Frontend
