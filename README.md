@@ -59,12 +59,10 @@ SkillTribe/
 ├── requirements.txt
 └── README.md
 
-## 👩‍💻 Contributors
+## 👥 Contributors
 
-- **Madhu Salini** – Developer
-- **Sridivya** – Developer
-
----
+- **Madhu Salini** - Developer
+- **Sridivya** - Developer
 
 ## 📄 License
 
