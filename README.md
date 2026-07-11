@@ -1,5 +1,5 @@
 # 🚀 SkillTribe
-![SkillTribe Homepage](images/homepage.png)
+![SkillTribe Homepage](static/images/homepage.png)
 
 SkillTribe is a modern skill-sharing platform where users can learn, teach, and connect with others.
 
