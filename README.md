@@ -32,8 +32,9 @@ SkillTribe is a modern skill-sharing platform where users can learn, teach, and 
 
 ### Deployment
 - Render
-## 📂 Project Structure
+## 📁 Project Structure
 
+```text
 SkillTribe/
 ├── static/
 ├── templates/
@@ -45,7 +46,7 @@ SkillTribe/
 ├── wsgi.py
 ├── requirements.txt
 └── README.md
-
+```
 ## ⚙️ Installation
 
 1. Clone the repository
